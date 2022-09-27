@@ -1,82 +1,80 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+  import { ref } from 'vue';
+  import Controls from './components/Controls.vue'
+  import Status from './components/Status.vue'
+  import type ControlLetter from './types/controlLetter';
+
+  const completedWords = ref<string[]>([])
+  const answers = ["Majorly", "Alarm", "Allay", "Alloy", "Ally", "Amoral", "Amorally", "Amyl", "Jolly", "Lama", "Llama", "Loam", "Loamy", "Loll", "Loom", "Lorry", "Loyal", "Loyally", "Mall", "Mammal", "Mayoral", "Molar", "Moll", "Molly", "Moola", "Moral", "Morally", "Oral", "Orally", "Rally", "Roll", "Royal", "Royally"].map(x => x.toLowerCase());
+  const controlLetters: ControlLetter[] = [
+    {
+      value: "L",
+      required: true
+    },
+    {
+      value: "A",
+    },
+    {
+      value: "J",
+    },
+    {
+      value: "M",
+    },
+    {
+      value: "O",
+    },
+    {
+      value: "R",
+    },
+    {
+      value: "Y",
+    }
+  ]
+
+  let message = ref('');
+  let showMessage = ref(false);
+
+  function validateGuessWord(guessWord: string){
+
+    guessWord = guessWord.toLowerCase();
+    const requiredLetter: ControlLetter | undefined = controlLetters.find((letter) => letter.required)
+
+    if(!requiredLetter) {
+      return
+    }
+    
+    
+    if (guessWord.length < 4){
+      message.value = "Too short"
+    } else if (!guessWord.includes(requiredLetter.value.toLowerCase())) {
+      console.log(requiredLetter.value)
+      message.value = "Missing center letter"
+    } else if (!answers.includes(guessWord)) {
+      message.value = "Not in the word list"
+    } else if (!completedWords.value.includes(guessWord)) {
+      completedWords.value.push(guessWord);
+      message.value = "Nice!"
+    }
+
+    showMessage.value = true
+
+    setTimeout(() => {
+      showMessage.value = false
+      setTimeout(() => {
+        message.value = ""
+      }, 300)
+    }, 3000)
+  }
+
 </script>
 
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
+    <span :class="[{ active: showMessage}, 'message']">{{ message }}</span>
     <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-      </nav>
+      <Controls :controlLetters="controlLetters" @submit="validateGuessWord"/>
+      <Status :completedWords="completedWords"/>
     </div>
   </header>
 
 </template>
-
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
-</style>
